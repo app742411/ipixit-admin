@@ -265,25 +265,25 @@ function ItemListComp({
 
     /* TOGGLE STATUS */
     const handleToggleStatus = async (id: string, current: boolean) => {
-        try {
-            await toggleItemStatus(id, !current);
-            toast.success(`Item ${!current ? 'activated' : 'deactivated'}`);
-            onRefresh();
-        } catch (error) {
-            toast.error("Failed to update status");
-        }
+    try {
+        await toggleItemStatus(id, !current);
+        toast.success(`Item ${!current ? 'activated' : 'deactivated'}`);
+        onRefresh();
+    } catch {
+        toast.error("Failed to update status");
     }
+}
 
     /* TOGGLE PUBLISH */
     const handleTogglePublish = async (id: string, current: boolean) => {
-        try {
-            await toggleItemPublish(id, !current);
-            toast.success(`Item ${!current ? 'published' : 'unpublished'}`);
-            onRefresh();
-        } catch (error) {
-            toast.error("Failed to update publish status");
-        }
+    try {
+        await toggleItemPublish(id, !current);
+        toast.success(`Item ${!current ? 'published' : 'unpublished'}`);
+        onRefresh();
+    } catch {
+        toast.error("Failed to update publish status");
     }
+}
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">

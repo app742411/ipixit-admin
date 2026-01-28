@@ -37,12 +37,14 @@ const ChangePassword = () => {
         replace: true,
         state: { adminId },
       });
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { message?: string } };
+      };
 
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to send OTP");
+      toast.error(err.response?.data?.message || "Failed to send OTP");
     }
   };
-
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4">

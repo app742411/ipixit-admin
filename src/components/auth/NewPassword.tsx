@@ -22,8 +22,7 @@ const NewPassword = () => {
   const { state } = useLocation();
 
   //  adminId from OTP page or session (refresh-safe)
-  const adminId =
-    state?.adminId || sessionStorage.getItem("resetAdminId");
+  const adminId = state?.adminId || sessionStorage.getItem("resetAdminId");
 
   const {
     register,
@@ -58,10 +57,12 @@ const NewPassword = () => {
 
       toast.success("Password updated successfully");
       navigate("/signin", { replace: true });
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Failed to update password"
-      );
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { message?: string } };
+      };
+
+      toast.error(err.response?.data?.message || "Failed to update password");
     }
   };
 
@@ -134,9 +135,7 @@ const NewPassword = () => {
                 })}
               />
               <span
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
               >
                 {showConfirmPassword ? (

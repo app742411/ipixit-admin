@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useForm, Controller } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useAdminProfile } from "../../context/AdminProfileContext";
 
@@ -23,7 +22,7 @@ type LoginFormValues = {
 
 export default function SignInForm() {
   const navigate = useNavigate();
-  const { t } = useTranslation(['auth', 'common']);
+  // const { t } = useTranslation(['auth', 'common']);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -66,7 +65,7 @@ export default function SignInForm() {
 
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.message || t('auth:loginError')
+        error?.response?.data?.message || "Invalid email or password"
       );
     } finally {
       setLoading(false);
