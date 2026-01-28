@@ -10,22 +10,29 @@ export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
+
+
   const handleSignOut = async () => {
     try {
-      await logoutApi(); // api/admin/signout
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+      await logoutApi(); // optional
+    } catch {
       console.warn("Logout API failed");
-    } finally {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
-      localStorage.removeItem("user");
-      //  delay navigation to avoid race condition
-      setTimeout(() => {
-        navigate("/signin", { replace: true });
-      }, 0);
     }
+
+    setIsOpen(false);
+
+    // 🔥 clear auth FIRST
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // ❌ DO NOT call any API here
+    // refreshProfile(); ❌ REMOVE THIS
+
+    navigate("/signin", { replace: true });
   };
+
+
   function toggleDropdown() {
     setIsOpen(!isOpen);
   }
@@ -35,7 +42,7 @@ export default function UserDropdown() {
   }
   const { profile } = useAdminProfile();
 
-  //if (!profile) return null;
+
 
   return (
     <div className="relative">

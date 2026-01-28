@@ -27,23 +27,24 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
-    const isAuthPage = window.location.pathname.includes("/signin");
 
-    if (status === 401 && !isAuthPage) {
-      // clear auth data
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    // 🔥 only clear if token exists (avoid logout loop)
+    if (status === 401 && token) {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       localStorage.removeItem("user");
 
-      // // redirect to signin
-      // window.location.href = "/signin";
-      if (window.location.pathname !== "/signin") {
-        window.location.replace("/signin");
-      }
+      // OPTIONAL: redirect here OR let ProtectedRoute handle it
+      // window.location.replace("/signin");
     }
 
     return Promise.reject(error);
   }
 );
+
+
 
 export default axiosInstance;

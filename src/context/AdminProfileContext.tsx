@@ -24,13 +24,28 @@ type AdminProfileContextType = {
 const AdminProfileContext = createContext<AdminProfileContextType | null>(null);
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const getToken = () =>
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+
 
 export const AdminProfileProvider = ({ children }: { children: React.ReactNode }) => {
     const [profile, setProfile] = useState<AdminProfile | null>(null);
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async () => {
+        const token = getToken();
+
+        //  HARD STOP if logged out
+        if (!token) {
+            setProfile(null);
+            setLoading(false);
+            return;
+        }
+
         try {
+            setLoading(true);
+
             const res = await getAdminProfile();
             const data = res.data.data;
 
@@ -40,17 +55,18 @@ export const AdminProfileProvider = ({ children }: { children: React.ReactNode }
 
             setProfile({
                 ...data,
-                profileImage, //  single source of truth
+                profileImage,
             });
         } catch (err) {
             console.error("Profile fetch failed", err);
+            setProfile(null); // important
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchProfile(); // called once on mount
+        fetchProfile();
     }, []);
 
     return (

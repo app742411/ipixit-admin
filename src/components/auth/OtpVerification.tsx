@@ -66,17 +66,17 @@ const OtpVerification = () => {
   return (
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="w-full max-w-md text-center">
-        <h1 className="mb-2 text-xl font-bold text-gray-800 dark:text-white">
-          OTP Verification
-        </h1>
-        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-          Enter the 6-digit code sent to your email
-        </p>
+
 
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="p-6 bg-white rounded-lg shadow-theme-xs dark:bg-gray-900"
-        >
+        ><h1 className="mb-2 text-xl font-bold text-gray-800 dark:text-white">
+            OTP Verification
+          </h1>
+          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+            Enter the 6-digit code sent to your email
+          </p>
           {/* Hidden register for RHF validation */}
           <input
             type="hidden"
@@ -98,10 +98,9 @@ const OtpVerification = () => {
                 onChange={(e) => handleChange(e.target.value, index)}
                 inputMode="numeric"
                 className={`h-12 w-12 rounded-lg border text-center text-lg font-semibold focus:outline-none focus:ring-2
-                  ${
-                    errors.otp
-                      ? "border-error-500 focus:ring-error-500/20"
-                      : "border-gray-300 focus:ring-brand-500/20 dark:border-gray-700"
+                  ${errors.otp
+                    ? "border-error-500 focus:ring-error-500/20"
+                    : "border-gray-300 focus:ring-brand-500/20 dark:border-gray-700"
                   }
                 `}
               />

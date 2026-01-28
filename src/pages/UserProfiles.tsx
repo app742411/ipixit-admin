@@ -8,7 +8,7 @@ export default function UserProfiles() {
   return (
     <>
       <PageMeta
-        title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
+        title="Profile Dashboard | Ipixit - Admin Dashboard Template"
       />
       <PageBreadcrumb pageTitle="Profile" />
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">

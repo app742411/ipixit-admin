@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router";
 import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
+import { useAdminProfile } from "../../context/AdminProfileContext";
 
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
@@ -38,6 +39,7 @@ export default function SignInForm() {
       rememberMe: false,
     },
   });
+  const { refreshProfile } = useAdminProfile();
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setLoading(true);
@@ -55,6 +57,8 @@ export default function SignInForm() {
       } else {
         sessionStorage.setItem("token", token);
       }
+
+      await refreshProfile();
 
       toast.success(message || "Login successful");
       // navigate("/");
@@ -81,24 +85,24 @@ export default function SignInForm() {
             height={40}
           />
           <h1 className="mb-2 font-bold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-            {t('auth:signIn')}
+            Sign In
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('auth:enterEmailPassword')}
+            Enter your email and password to sign in
           </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Email */}
           <div>
-            <Label>{t('auth:email')} *</Label>
+            <Label>Email *</Label>
             <Input
-              placeholder={t('auth:emailPlaceholder')}
+              placeholder="Enter your email"
               {...register("email", {
-                required: t('auth:emailRequired'),
+                required: "Email is required",
                 pattern: {
                   value: /^\S+@\S+$/i,
-                  message: t('auth:invalidEmail'),
+                  message: "Invalid email address",
                 },
               })}
             />
@@ -111,16 +115,16 @@ export default function SignInForm() {
 
           {/* Password */}
           <div>
-            <Label>{t('auth:password')} *</Label>
+            <Label>Password *</Label>
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder={t('auth:passwordPlaceholder')}
+                placeholder="Enter your password"
                 {...register("password", {
-                  required: t('auth:passwordRequired'),
+                  required: "Password is required",
                   minLength: {
                     value: 6,
-                    message: t('auth:passwordMinLength'),
+                    message: "Password must be at least 6 characters long",
                   },
                 })}
               />
@@ -156,7 +160,7 @@ export default function SignInForm() {
                 )}
               />
               <span className="text-sm text-gray-700 dark:text-gray-400">
-                {t('auth:rememberMe')}
+                Remember me
               </span>
             </label>
 
@@ -164,7 +168,7 @@ export default function SignInForm() {
               to="/reset-password"
               className="text-sm text-brand-500 hover:text-brand-600"
             >
-              {t('auth:forgotPassword')}
+              Forgot Password?
             </Link>
           </div>
 
@@ -174,7 +178,7 @@ export default function SignInForm() {
             size="sm"
             disabled={loading}
           >
-            {loading ? t('auth:signingIn') : t('auth:signInButton')}
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
       </div>

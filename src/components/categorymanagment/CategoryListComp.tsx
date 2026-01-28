@@ -1,4 +1,4 @@
-import { useState, memo } from "react";
+import { useState, memo, useCallback } from "react";
 import ComponentCard from "../../components/common/ComponentCard";
 import toast from "react-hot-toast";
 import { removeCategory } from "../../api/categoryapi";
@@ -13,7 +13,6 @@ type Category = {
   title: string;
   image: string;
 };
-
 
 type Props = {
   categories: Category[];
@@ -34,8 +33,8 @@ type Props = {
 const ROW_HEIGHT = 56;
 const ITEMS_PER_PAGE = 8;
 
+/* ================= CATEGORY ROW ================= */
 
-// Memoized Category Row to prevent unnecessary re-renders
 const CategoryRow = memo(
   ({
     category,
@@ -46,20 +45,23 @@ const CategoryRow = memo(
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
   }) => {
+    const imageSrc = category.image
+      ? `${IMAGE_BASE_URL}${category.image}`
+      : "/images/placeholder.png";
+
     return (
       <div className="flex h-14 items-center justify-between px-2 rounded hover:bg-gray-50">
         <div className="flex items-center gap-3">
           <img
-            src={
-              category.image
-                ? `${IMAGE_BASE_URL}${category.image}`
-                : "/images/placeholder.png"
-            }
+            src={imageSrc}
             alt={category.title}
+            loading="lazy"
             className="h-10 w-10 rounded border object-cover"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src =
-                "/images/placeholder.png";
+              const img = e.currentTarget;
+              if (!img.src.includes("placeholder")) {
+                img.src = "/images/placeholder.png";
+              }
             }}
           />
           <h4 className="text-sm font-medium text-gray-900">
@@ -90,6 +92,8 @@ const CategoryRow = memo(
 
 CategoryRow.displayName = "CategoryRow";
 
+/* ================= CATEGORY LIST ================= */
+
 function CategoryListComp({
   categories,
   pagination,
@@ -105,7 +109,21 @@ function CategoryListComp({
   const [isDeleting, setIsDeleting] = useState(false);
   const { page, totalPages } = pagination;
 
-  /* DELETE CATEGORY */
+  /* ---------- STABLE CALLBACKS ---------- */
+
+  const handleDeleteClick = useCallback((id: string) => {
+    setDeleteId(id);
+  }, []);
+
+  const handleEdit = useCallback(
+    (id: string) => {
+      onEdit(id);
+    },
+    [onEdit]
+  );
+
+  /* ---------- DELETE CATEGORY ---------- */
+
   const handleDelete = async () => {
     if (!deleteId) return;
 
@@ -123,15 +141,10 @@ function CategoryListComp({
     }
   };
 
-  const handleDeleteClick = (id: string) => {
-    setDeleteId(id);
-  };
-
   return (
     <div className="w-full rounded-2xl border bg-white p-5">
       <ComponentCard title="Category List">
-
-        {/* 🔍 SEARCH INPUT - Always rendered, never loses focus */}
+        {/* SEARCH */}
         <div className="mb-4 relative">
           <Input
             type="text"
@@ -147,58 +160,36 @@ function CategoryListComp({
           )}
         </div>
 
-        {/* 📋 LIST WITH LOADING OVERLAY */}
-        <div className="relative">
-          <div
-            className="divide-y divide-gray-200"
-            style={{ minHeight: ROW_HEIGHT * ITEMS_PER_PAGE }}
-          >
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
-                  <p className="text-sm text-gray-500">Loading categories...</p>
-                </div>
-              </div>
-            ) : categories.length === 0 ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <p className="text-sm text-gray-500">
-                    {search
-                      ? `No categories found for "${search}"`
-                      : "No categories found."}
-                  </p>
-                  {search && (
-                    <button
-                      onClick={() => onSearchChange("")}
-                      className="mt-2 text-sm text-blue-500 hover:text-blue-600"
-                    >
-                      Clear search
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              categories.map((category) => (
-                <CategoryRow
-                  key={category._id}
-                  category={category}
-                  onEdit={onEdit}
-                  onDelete={handleDeleteClick}
-                />
-              ))
-            )}
-          </div>
-
-          {/* SEARCH LOADING OVERLAY */}
-          {searchLoading && !loading && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
+        {/* LIST */}
+        <div
+          className="divide-y divide-gray-200"
+          style={{ minHeight: ROW_HEIGHT * ITEMS_PER_PAGE }}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
             </div>
+          ) : categories.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-sm text-gray-500">
+                {search
+                  ? `No categories found for "${search}"`
+                  : "No categories found."}
+              </p>
+            </div>
+          ) : (
+            categories.map((category) => (
+              <CategoryRow
+                key={category._id}
+                category={category}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+              />
+            ))
           )}
         </div>
 
-        {/* 📄 PAGINATION */}
+        {/* PAGINATION */}
         <Pagination
           currentPage={page}
           totalPages={totalPages}
@@ -208,7 +199,7 @@ function CategoryListComp({
           loading={loading}
         />
 
-        {/* ❌ DELETE MODAL */}
+        {/* DELETE MODAL */}
         {deleteId && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
@@ -222,31 +213,23 @@ function CategoryListComp({
                 Delete Category?
               </h3>
               <p className="mt-2 text-sm text-gray-600">
-                This action cannot be undone. The category will be permanently
-                removed.
+                This action cannot be undone.
               </p>
 
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   onClick={() => setDeleteId(null)}
                   disabled={isDeleting}
-                  className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="rounded bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
                 >
-                  {isDeleting ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>
@@ -257,5 +240,4 @@ function CategoryListComp({
   );
 }
 
-// Export memoized component to prevent unnecessary re-renders
 export default memo(CategoryListComp);
