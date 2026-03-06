@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { useNavigate } from "react-router";
 import { logoutApi } from "../../api/authApi";
 import { useAdminProfile } from "../../context/AdminProfileContext";
 
-
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-
-
 
   const handleSignOut = async () => {
     try {
@@ -26,10 +21,8 @@ export default function UserDropdown() {
     sessionStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    // ❌ DO NOT call any API here
-    // refreshProfile(); ❌ REMOVE THIS
-
-    navigate("/signin", { replace: true });
+    // Force a full reload to clear all React contexts (like AdminProfileContext)
+    window.location.href = "/signin";
   };
 
 

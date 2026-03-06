@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Table,
     TableBody,
@@ -9,7 +9,7 @@ import {
 import Badge from "../ui/badge/Badge";
 import Avatar from "../ui/avatar/Avatar";
 import { User } from "../../types/user";
-import { TrashBinIcon } from "../../icons";
+import { MoreDotIcon } from "../../icons";
 import { Link } from "react-router-dom";
 
 
@@ -21,6 +21,15 @@ interface AllListUserCompProps {
 }
 
 const AllListUserComp: React.FC<AllListUserCompProps> = ({ users, onDelete, onStatusChange }) => {
+
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setOpenDropdownId(null);
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, []);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -49,40 +58,40 @@ const AllListUserComp: React.FC<AllListUserCompProps> = ({ users, onDelete, onSt
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="max-w-full overflow-x-auto">
-                <Table>
-                    <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                        <TableRow>
-                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+            <div className="relative overflow-x-auto" style={{ minHeight: 70 * 10 }}>
+                <Table className="w-full text-left border-collapse whitespace-nowrap">
+                    <TableHeader>
+                        <TableRow className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
+                            <TableCell isHeader className="px-4 py-3">
                                 User
                             </TableCell>
-                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                            <TableCell isHeader className="px-4 py-3">
                                 Role
                             </TableCell>
-                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                            <TableCell isHeader className="px-4 py-3">
                                 Created
                             </TableCell>
-                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                            <TableCell isHeader className="px-4 py-3">
                                 Verified
                             </TableCell>
-                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                            <TableCell isHeader className="px-4 py-3">
                                 Status
                             </TableCell>
-                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                            <TableCell isHeader className="px-4 py-3">
                                 Action
                             </TableCell>
                         </TableRow>
                     </TableHeader>
-                    <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                    <TableBody>
                         {users.map((user) => (
-                            <TableRow key={user._id}>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start">
+                            <TableRow
+                                key={user._id}
+                                className="hover:bg-gray-50 border-b border-gray-100 last:border-0 cursor-pointer"
+                                onClick={() => window.location.href = `/users/${user._id}`}
+                            >
+                                <TableCell className="px-4 py-3">
                                     <div
-                                        className="flex items-center gap-3 cursor-pointer"
-                                        onClick={() => window.location.href = `/users/${user._id}`} // Or use useNavigate if I can inject it, but component props don't have navigate. 
-                                    // The component is cleaner if I wrap row or use a Link. 
-                                    // But I can't assume Router context unless I imported Link.
-                                    // Better: Use Link from react-router-dom
+                                        className="flex items-center gap-3"
                                     >
                                         <div className="w-10 h-10 overflow-hidden rounded-full">
                                             <Avatar
@@ -101,7 +110,7 @@ const AllListUserComp: React.FC<AllListUserCompProps> = ({ users, onDelete, onSt
                                         </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start text-theme-sm text-gray-500 dark:text-gray-400">
+                                <TableCell className="px-4 py-3 text-sm text-gray-600">
                                     {user.role ? (
                                         <Badge
                                             size="sm"
@@ -114,10 +123,10 @@ const AllListUserComp: React.FC<AllListUserCompProps> = ({ users, onDelete, onSt
                                         <span className="text-gray-400">-</span>
                                     )}
                                 </TableCell>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start text-theme-sm text-gray-500 dark:text-gray-400">
+                                <TableCell className="px-4 py-3 text-sm text-gray-600">
                                     {formatDate(user.createdAt)}
                                 </TableCell>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start text-theme-sm text-gray-500 dark:text-gray-400">
+                                <TableCell className="px-4 py-3 text-sm text-gray-600">
                                     <Badge
                                         size="sm"
                                         color={user.isVerified ? 'success' : 'warning'}
@@ -126,7 +135,7 @@ const AllListUserComp: React.FC<AllListUserCompProps> = ({ users, onDelete, onSt
                                         {user.isVerified ? 'Verified' : 'Unverified'}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start text-theme-sm text-gray-500 dark:text-gray-400">
+                                <TableCell className="px-4 py-3 text-sm text-gray-600">
                                     <Badge
                                         size="sm"
                                         color={user.status === 'active' ? 'success' : 'light'}
@@ -135,54 +144,60 @@ const AllListUserComp: React.FC<AllListUserCompProps> = ({ users, onDelete, onSt
                                         {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Unknown'}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start text-theme-sm text-gray-500 dark:text-gray-400">
-                                    <div className="flex gap-2">
-                                        {/* Status Toggle */}
+                                <TableCell className="px-4 py-3">
+                                    <div className="relative inline-block text-left">
                                         <button
-                                            title={`Change status (${user.status})`}
-                                            onClick={() => onStatusChange?.(user._id, user.status)}
-                                            className={`transition-colors ${user.status === "active"
-                                                ? "text-green-500 hover:text-green-600"
-                                                : "text-gray-400 hover:text-gray-500"
-                                                }`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setOpenDropdownId(openDropdownId === user._id ? null : user._id);
+                                            }}
+                                            className="p-2 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                            title="More Actions"
                                         >
-                                            🔄
+                                            <MoreDotIcon className="w-5 h-5" />
                                         </button>
 
-                                        {/* Delete */}
-                                        <button
-                                            title="Delete User"
-                                            onClick={() => onDelete?.(user._id)}
-                                            className="text-error-500 hover:text-error-600 transition-colors"
-                                        >
-                                            <TrashBinIcon className="h-5 w-5" />
-                                        </button>
-                                        {/* View Items – ONLY SELLER */}
-                                        {user.role === "seller" && (
-                                            <Link
-                                                to={`/seller-items/${user._id}`}
-                                                title="View All Items"
-                                                className="text-brand-500 hover:text-brand-600 transition-colors"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="18"
-                                                    height="18"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <rect x="3" y="3" width="7" height="7" />
-                                                    <rect x="14" y="3" width="7" height="7" />
-                                                    <rect x="14" y="14" width="7" height="7" />
-                                                    <rect x="3" y="14" width="7" height="7" />
-                                                </svg>
-                                            </Link>
+                                        {openDropdownId === user._id && (
+                                            <div className="absolute right-0 z-10 w-48 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-white/[0.05]">
+                                                <div className="py-1">
+                                                    {/* View Details - ONLY SELLER OR BOTH */}
+                                                    {(user.role === "seller" || user.role === "both") && (
+                                                        <Link
+                                                            to={`/seller-items/${user._id}`}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                                                            title="View All Items"
+                                                        >
+                                                            View Details (Media)
+                                                        </Link>
+                                                    )}
+
+                                                    {/* Status Toggle */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onStatusChange?.(user._id, user.status);
+                                                            setOpenDropdownId(null);
+                                                        }}
+                                                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                                                    >
+                                                        {user.status === "active" ? "Set Inactive" : "Set Active"}
+                                                    </button>
+
+                                                    {/* Delete */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onDelete?.(user._id);
+                                                            setOpenDropdownId(null);
+                                                        }}
+                                                        className="block w-full px-4 py-2 text-left text-sm text-error-500 transition-colors hover:bg-error-50 dark:hover:bg-error-500/10"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
                                         )}
-
                                     </div>
                                 </TableCell>
 

@@ -4,6 +4,7 @@ import { deleteItem, toggleItemStatus, toggleItemPublish } from "../../api/itemA
 import { PencilIcon, TrashBinIcon } from "../../icons";
 import Badge from "../ui/badge/Badge";
 import Pagination from "../common/Pagination";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 
 const IMAGE_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/uploads/items/images/`;
 
@@ -15,8 +16,8 @@ type Item = {
         lastName: string;
         email: string;
     };
-    category: { _id: string; title?: string }[];
-    price: number;
+    category?: { _id: string; title?: string };
+    price?: number;
     currency: string;
     format: string;
     isActive: boolean;
@@ -87,12 +88,12 @@ const ItemRow = memo(
             }
         };
         return (
-            <tr
+            <TableRow
                 onClick={() => onView(item._id)}
                 className="hover:bg-gray-50 border-b border-gray-100 last:border-0 cursor-pointer"
             >
                 {/* 1. Image */}
-                <td className="px-4 py-3">
+                <TableCell className="px-4 py-3">
                     <img
                         src={
                             item.media && item.media.length > 0
@@ -106,55 +107,58 @@ const ItemRow = memo(
                                 "/images/placeholder.png";
                         }}
                     />
-                </td>
+                </TableCell>
 
                 {/* 2. Title */}
-                <td className="px-4 py-3">
+                <TableCell className="px-4 py-3">
                     <span className="font-medium text-gray-900 truncate block max-w-[150px]" title={item.title}>{item.title}</span>
-                </td>
+                </TableCell>
 
                 {/* 3. Seller */}
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <TableCell className="px-4 py-3 text-sm text-gray-600">
                     <div className="flex flex-col">
                         <span className="font-medium">{item.seller ? `${item.seller.firstName} ${item.seller.lastName}` : 'N/A'}</span>
                         <span className="text-xs text-gray-400">{item.seller?.email}</span>
                     </div>
-                </td>
+                </TableCell>
 
                 {/* 4. Categories */}
-                <td className="px-4 py-3 text-sm text-gray-600">
-                    <span className="truncate block max-w-[150px]" title={item.category?.map(c => c.title || "").filter(Boolean).join(", ")}>
-                        {item.category?.map(c => c.title || "").filter(Boolean).join(", ") || "-"}
+                <TableCell className="px-4 py-3 text-sm text-gray-600">
+                    <span
+                        className="truncate block max-w-[150px]"
+                        title={item.category?.title || "-"}
+                    >
+                        {item.category?.title || "-"}
                     </span>
-                </td>
+                </TableCell>
 
                 {/* 5. Format */}
-                <td className="px-4 py-3 text-sm text-gray-600 capitalize">
+                <TableCell className="px-4 py-3 text-sm text-gray-600 capitalize">
                     {item.format}
-                </td>
+                </TableCell>
 
                 {/* 6. Price */}
-                <td className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">
-                    {item.price}
-                </td>
+                <TableCell className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">
+                    {item.price ?? '-'}
+                </TableCell>
 
                 {/* 7. Currency */}
-                <td className="px-4 py-3 text-sm text-gray-600 uppercase">
+                <TableCell className="px-4 py-3 text-sm text-gray-600 uppercase">
                     {item.currency || '-'}
-                </td>
+                </TableCell>
 
                 {/* 8. Stats (Views, Clicks, Likes, Purchases) */}
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <TableCell className="px-4 py-3 text-sm text-gray-600">
                     <div className="flex gap-3 text-xs">
                         <span title="Views" className="flex items-center gap-1">👁 {item.viewsCount}</span>
                         <span title="Clicks" className="flex items-center gap-1">🖱️ {item.clicksCount}</span>
                         <span title="Likes" className="flex items-center gap-1">❤️ {item.likesCount}</span>
                         <span title="Purchases" className="flex items-center gap-1">🛒 {item.purchasesCount}</span>
                     </div>
-                </td>
+                </TableCell>
 
                 {/* 9. File Type */}
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <TableCell className="px-4 py-3 text-sm text-gray-600">
                     {item.media && item.media.length > 0 ? (
                         <div className="flex items-center gap-2 max-w-[220px]">
                             <span className="text-lg">
@@ -176,32 +180,32 @@ const ItemRow = memo(
                     ) : (
                         <span className="text-xs text-gray-400">No File</span>
                     )}
-                </td>
+                </TableCell>
 
 
 
                 {/* 10. Published */}
-                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onTogglePublish(item._id, item.isPublished)}>
                         <Badge size="sm" color={item.isPublished ? "primary" : "warning"} variant="light">
                             {item.isPublished ? "Yes" : "No"}
                         </Badge>
                     </button>
-                </td>
+                </TableCell>
 
 
                 {/* 11. Active */}
-                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onToggleStatus(item._id, item.isActive)}>
                         <Badge size="sm" color={item.isActive ? "success" : "error"} variant="light">
                             {item.isActive ? "Yes" : "No"}
                         </Badge>
                     </button>
-                </td>
+                </TableCell>
 
 
                 {/* 12. Actions */}
-                <td className="px-4 py-3">
+                <TableCell className="px-4 py-3">
                     <div
                         className="flex items-center gap-2"
                         onClick={(e) => e.stopPropagation()}
@@ -222,9 +226,9 @@ const ItemRow = memo(
                             <TrashBinIcon className="w-5 h-5" />
                         </button>
                     </div>
-                </td>
+                </TableCell>
 
-            </tr>
+            </TableRow>
         );
     }
 );
@@ -265,62 +269,62 @@ function ItemListComp({
 
     /* TOGGLE STATUS */
     const handleToggleStatus = async (id: string, current: boolean) => {
-    try {
-        await toggleItemStatus(id, !current);
-        toast.success(`Item ${!current ? 'activated' : 'deactivated'}`);
-        onRefresh();
-    } catch {
-        toast.error("Failed to update status");
+        try {
+            await toggleItemStatus(id, !current);
+            toast.success(`Item ${!current ? 'activated' : 'deactivated'}`);
+            onRefresh();
+        } catch {
+            toast.error("Failed to update status");
+        }
     }
-}
 
     /* TOGGLE PUBLISH */
     const handleTogglePublish = async (id: string, current: boolean) => {
-    try {
-        await toggleItemPublish(id, !current);
-        toast.success(`Item ${!current ? 'published' : 'unpublished'}`);
-        onRefresh();
-    } catch {
-        toast.error("Failed to update publish status");
+        try {
+            await toggleItemPublish(id, !current);
+            toast.success(`Item ${!current ? 'published' : 'unpublished'}`);
+            onRefresh();
+        } catch {
+            toast.error("Failed to update publish status");
+        }
     }
-}
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="relative overflow-x-auto" style={{ minHeight: ROW_HEIGHT * ITEMS_PER_PAGE }}>
-                <table className="w-full text-left border-collapse whitespace-nowrap">
-                    <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
-                            <th className="px-4 py-3">Image</th>
-                            <th className="px-4 py-3">Title</th>
-                            <th className="px-4 py-3">Seller</th>
-                            <th className="px-4 py-3">Categories</th>
-                            <th className="px-4 py-3">Format</th>
-                            <th className="px-4 py-3">Price</th>
-                            <th className="px-4 py-3">Currency</th>
-                            <th className="px-4 py-3">Stats</th>
-                            <th className="px-4 py-3">File Type</th>
-                            <th className="px-4 py-3">Published</th>
-                            <th className="px-4 py-3">Active</th>
-                            <th className="px-4 py-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <Table className="w-full text-left border-collapse whitespace-nowrap">
+                    <TableHeader>
+                        <TableRow className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
+                            <TableCell isHeader className="px-4 py-3">Image</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Title</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Seller</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Categories</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Format</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Price</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Currency</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Stats</TableCell>
+                            <TableCell isHeader className="px-4 py-3">File Type</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Published</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Active</TableCell>
+                            <TableCell isHeader className="px-4 py-3">Actions</TableCell>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {loading ? (
-                            <tr>
-                                <td colSpan={12} className="py-12 text-center">
+                            <TableRow>
+                                <TableCell colSpan={12} className="py-12 text-center">
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
                                         <p className="text-sm text-gray-500">Loading items...</p>
                                     </div>
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         ) : items.length === 0 ? (
-                            <tr>
-                                <td colSpan={12} className="py-12 text-center text-sm text-gray-500">
+                            <TableRow>
+                                <TableCell colSpan={12} className="py-12 text-center text-sm text-gray-500">
                                     {search ? `No items found for "${search}"` : "No items found."}
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         ) : (
                             items.map((item) => (
                                 <ItemRow
@@ -334,8 +338,8 @@ function ItemListComp({
                                 />
                             ))
                         )}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
 
                 {searchLoading && !loading && (
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-10">

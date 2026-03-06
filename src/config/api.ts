@@ -16,6 +16,12 @@ export const API_ROUTES = {
   UPDATE_CATEGORY: "/api/category/update",
   DELETE_CATEGORY: "/api/category/soft-delete",
 
+  // SubCategory Management
+  CREATE_SUBCATEGORY: "/api/category/subcategory", // POST
+  UPDATE_SUBCATEGORY: "/api/category/subcategory", // PUT /:id
+  DELETE_SUBCATEGORY: "/api/category/subcategory", // DELETE /:id
+  GET_SUBCATEGORIES_BY_CATEGORY_ID: "/api/category/getSubCategoryByCategoryId", // GET /:id
+
 
   // User Management
   GET_ALL_USERS: "api/admin/getAllUsers", //GET ALL USERS
@@ -23,6 +29,10 @@ export const API_ROUTES = {
   BLOCK_USER: "api/admin/blockUser", // ACTIVE INACTIVE USER
   GET_USER: "api/admin/getUser", // GET SINGLE USER
   UPDATE_USER: "api/admin/updateUser", // UPDATE USER
+  GET_PENDING_SELLERS: "api/admin/pending-sellers",
+  GET_PENDING_BUYER_SELLER_REQUESTS: "api/admin/pending-buyer-seller-requests",
+  APPROVE_SELLER: "api/admin/approval",
+  APPROVE_BUYER_SELLER: "api/admin/seller-request",
 
   // Item Management
   GET_ITEM_DETAILS: "api/admin/getAllItems",
@@ -33,4 +43,9 @@ export const API_ROUTES = {
   GET_ITEM_BY_ID: "api/admin/getItemById",
   COMMISSION: "api/admin/commission",
 
+  // Subadmin Management
+  CREATE_SUBADMIN: "api/admin/create-subadmin", // POST
+  UPDATE_SUBADMIN: "api/admin/updateSubadmin", // PUT /:id
+  GET_SUBADMINS: "api/admin/getAllSubadmins", // GET (assumed)
+  DELETE_SUBADMIN: "api/admin/deleteSubadmin", // DELETE /:id (assumed)
 };

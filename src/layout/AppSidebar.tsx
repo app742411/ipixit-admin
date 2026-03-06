@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
-// Assume these icons are imported from an icon library
 import {
-  // BoxCubeIcon,
-  // CalenderIcon,
   ChevronDownIcon,
   GridIcon,
-  HorizontaLDots,
+  GroupIcon,
+  FolderIcon,
+  BoxIcon,
+  DollarLineIcon,
+  CheckCircleIcon,
   ListIcon,
-  // PageIcon,
+  ShootingStarIcon,
   PieChartIcon,
-  // PlugInIcon,
-  // TableIcon,
-  UserCircleIcon,
+  ChatIcon,
+  LockIcon,
+  PlugInIcon,
+  HorizontaLDots,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-// import SidebarWidget from "./SidebarWidget";
+import { useAdminProfile } from "../context/AdminProfileContext";
 
 type NavItem = {
   name: string;
@@ -26,120 +28,59 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  {
-    name: "User Management",
-    icon: <UserCircleIcon />,
-    subItems: [
-      { name: "Users", path: "/Users", pro: false },
-    ],
-  },
-  {
-    name: "Category Management",
-    icon: <ListIcon />,
-    path: "/category-management",
-  },
-  {
-    name: "Items Management",
-    icon: <ListIcon />,
-    path: "/items-management",
-  },
-  {
-    name: "Commission Manage",
-    icon: <PieChartIcon />,
-    path: "/commission-management",
-  },
-
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
+  { icon: <GridIcon />, name: "Dashboard", path: "/" },
+  { icon: <GroupIcon />, name: "Users Management", path: "/users" },
+  { icon: <FolderIcon />, name: "Photo / Media Management", path: "/media-management" },
+  { icon: <BoxIcon />, name: "Orders / Purchases", path: "/orders-purchases" },
+  { icon: <DollarLineIcon />, name: "Payments & Earnings", path: "/payments-earnings" },
+  { icon: <CheckCircleIcon />, name: "Content Moderation", path: "/content-moderation" },
+  { icon: <ListIcon />, name: "Categories & Tags", path: "/categories" },
+  { icon: <ShootingStarIcon />, name: "Reviews & Ratings", path: "/reviews-ratings" },
+  { icon: <PieChartIcon />, name: "Analytics & Reports", path: "/analytics-reports" },
 ];
 
 const othersItems: NavItem[] = [
-  // {
-  //   icon: <PieChartIcon />,
-  //   name: "Charts",
-  //   subItems: [
-  //     { name: "Line Chart", path: "/line-chart", pro: false },
-  //     { name: "Bar Chart", path: "/bar-chart", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "UI Elements",
-  //   subItems: [
-  //     { name: "Alerts", path: "/alerts", pro: false },
-  //     { name: "Avatar", path: "/avatars", pro: false },
-  //     { name: "Badge", path: "/badge", pro: false },
-  //     { name: "Buttons", path: "/buttons", pro: false },
-  //     { name: "Images", path: "/images", pro: false },
-  //     { name: "Videos", path: "/videos", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <PlugInIcon />,
-  //   name: "Authentication",
-  //   subItems: [
-  //     { name: "Sign In", path: "/signin", pro: false },
-  //     { name: "Sign Up", path: "/signup", pro: false },
-  //   ],
-  // },
+  { icon: <ChatIcon />, name: "Support / Helpdesk", path: "/support-helpdesk" },
+  { icon: <LockIcon />, name: "Roles & permssion", path: "/roles-permission" },
+  { icon: <PlugInIcon />, name: "App Settings", path: "/app-settings" },
 ];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const { profile } = useAdminProfile();
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
   } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
-  const isActive = useCallback(
-    (path: string) => location.pathname === path,
-    [location.pathname]
-  );
+  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
+
+  const hasAccess = useCallback((path?: string) => {
+    if (!profile) return false;
+    if (profile.role === 'admin' || !profile.role) return true; // Super admin
+
+    const perms = profile.permissions || [];
+    switch (path) {
+      case '/': return perms.includes('dashboard_view');
+      case '/users': return perms.includes('users_view');
+      case '/media-management': return perms.includes('items_view');
+      case '/orders-purchases': return perms.includes('orders_view');
+      case '/categories': return perms.includes('categories_manage');
+      case '/roles-permission': return perms.includes('subadmin_manage');
+      // For items with no explicit permission mapping, we hide them for subadmins
+      default: return false;
+    }
+  }, [profile]);
 
   useEffect(() => {
     let submenuMatched = false;
     ["main", "others"].forEach((menuType) => {
       const items = menuType === "main" ? navItems : othersItems;
-      items.forEach((nav, index) => {
+      items.filter(item => hasAccess(item.path)).forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
             if (isActive(subItem.path)) {
@@ -157,7 +98,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [location, isActive]);
+  }, [location, isActive, hasAccess]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -186,7 +127,7 @@ const AppSidebar: React.FC = () => {
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
+      {items.filter((nav) => hasAccess(nav.path)).map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
             <button
