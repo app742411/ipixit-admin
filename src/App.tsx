@@ -30,6 +30,8 @@ import SellerItemDetails from "./pages/Items/UserItemDetails";
 import ItemDetails from "./pages/Items/ItemDetails";
 import ChangePassword from "./components/auth/LoginChangePassword";
 import CommissionManage from "./pages/Commission/CommissionManage";
+import RolesPermissionManage from "./pages/RolesPermission/RolesPermissionManage";
+import SupportHelpdesk from "./pages/Support/SupportHelpdesk";
 
 export default function App() {
   return (
@@ -46,6 +48,7 @@ export default function App() {
               <Route path="/profile" element={<UserProfiles />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/blank" element={<Blank />} />
+              <Route path="/support-helpdesk" element={<SupportHelpdesk />} />
 
               {/* User Management */}
               <Route path="/users" element={<UserListManage />} />
@@ -54,18 +57,19 @@ export default function App() {
 
               {/*  Category Management */}
               <Route
-                path="/category-management"
+                path="/categories"
                 element={<CategoryManage />}
               />
 
               {/* Item Management */}
-              <Route path="/items-management" element={<ItemManagement />} />
-              <Route path="/items-management/:id" element={<ItemDetails />} />
+              <Route path="/media-management" element={<ItemManagement />} />
+              <Route path="/media-management/:id" element={<ItemDetails />} />
 
               {/* Commission Management */}
               <Route path="/commission-management" element={<CommissionManage />} />
 
-
+              {/* Roles & Permissions */}
+              <Route path="/roles-permission" element={<RolesPermissionManage />} />
               {/* Forms */}
               <Route path="/form-elements" element={<FormElements />} />
 

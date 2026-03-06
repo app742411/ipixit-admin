@@ -23,7 +23,7 @@ export default function CategoryManage() {
   // 🔍 Controlled input value (instant)
   const [searchInput, setSearchInput] = useState("");
 
-  // 🕒 Debounced value (500ms)
+  //  Debounced value (500ms)
   const debouncedSearch = useDebounce(searchInput, 500);
 
   const [editId, setEditId] = useState<string | null>(null);

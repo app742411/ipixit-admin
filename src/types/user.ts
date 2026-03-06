@@ -32,7 +32,7 @@ export interface User {
     email: string | null;
     phoneNumber: string | null;
     countryCode: string | null;
-    role: 'buyer' | 'seller' | null;
+    role: 'buyer' | 'seller' | 'both' | null;
     status: 'active' | 'inactive';
     isVerified: boolean;
     isDeleted: boolean;
@@ -49,6 +49,10 @@ export interface User {
     // Categories can be strings (IDs) in list or Objects in details.
     categories: string[] | Category[];
     profilePic?: string; // Added from details response
+    sellerRequest?: {
+        requestedAt: string;
+        [key: string]: any;
+    };
 }
 
 export interface Meta {

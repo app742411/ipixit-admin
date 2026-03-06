@@ -5,7 +5,6 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ItemListComp from "../../components/itemmanagement/ItemListComp";
 import { getAllItems } from "../../api/itemApi";
-import { getAllCategories } from "../../api/categoryapi";
 import { useDebounce } from "../../hooks/useDebounce";
 import { useNavigate } from "react-router-dom";
 
@@ -14,7 +13,6 @@ const ITEMS_PER_PAGE = 10;
 export default function ItemManagement() {
     const navigate = useNavigate();
     const [items, setItems] = useState<any[]>([]);
-    const [categoriesMap, setCategoriesMap] = useState<Record<string, string>>({});
     const [pagination, setPagination] = useState({
         page: 1,
         totalPages: 1,
@@ -27,7 +25,8 @@ export default function ItemManagement() {
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchInput, setSearchInput] = useState("");
     const debouncedSearch = useDebounce(searchInput, 500);
-    const [isDeleted, setIsDeleted] = useState(false);
+    // const [isDeleted, setIsDeleted] = useState(false);
+    const isDeleted = false;
 
     // Filter handlers
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -35,34 +34,15 @@ export default function ItemManagement() {
         setPagination(prev => ({ ...prev, page: 1 }));
     };
 
-    const handleDeletedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setIsDeleted(e.target.checked);
-        setPagination(prev => ({ ...prev, page: 1 }));
-    };
+    // const handleDeletedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     setIsDeleted(e.target.checked);
+    //     setPagination(prev => ({ ...prev, page: 1 }));
+    // };
 
     const handleSearchChange = (value: string) => {
         setSearchInput(value);
     };
 
-    // Fetch Categories to map IDs to Titles
-    const fetchCategories = useCallback(async () => {
-        try {
-            const res = await getAllCategories({ page: 1, limit: 1000 }); // Fetch all/most categories
-            if (res.data && Array.isArray(res.data)) {
-                const map: Record<string, string> = {};
-                res.data.forEach((cat: any) => {
-                    map[cat._id || cat.id] = cat.title;
-                });
-                setCategoriesMap(map);
-            }
-        } catch (error) {
-            console.error("Failed to fetch categories map:", error);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchCategories();
-    }, [fetchCategories]);
 
     // Memoized fetch function
     const fetchItems = useCallback(
@@ -125,16 +105,14 @@ export default function ItemManagement() {
 
     const handleView = useCallback((id: string) => {
         console.log("Navigating to item:", id);
-        navigate(`/items-management/${id}`);
+        navigate(`/media-management/${id}`);
     }, [navigate]);
 
     // Map items with category titles
-    const mappedItems = items.map(item => ({
+    const mappedItems = items.map((item) => ({
         ...item,
-        category: item.category?.map((c: any) => ({
-            ...c,
-            title: c.title || categoriesMap[c._id] || "Unknown"
-        }))
+        categoryTitle: item.category?.title ?? "Unknown",
+        subCategoryTitles: item.subCategories?.map((s: any) => s.title).join(", ") ?? ""
     }));
 
     return (
@@ -185,7 +163,7 @@ export default function ItemManagement() {
             </div>
 
             {/* Deleted Toggle */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
                 <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
                     <input
                         type="checkbox"
@@ -195,7 +173,7 @@ export default function ItemManagement() {
                     />
                     Show Deleted Items
                 </label>
-            </div>
+            </div> */}
 
             <ItemListComp
                 items={mappedItems}

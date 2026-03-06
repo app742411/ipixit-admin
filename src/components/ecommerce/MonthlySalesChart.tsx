@@ -7,7 +7,7 @@
 
 // export default function MonthlySalesChart() {
 //   const options: ApexOptions = {
-//     colors: ["#4F46E5"],
+//     colors: ["##3FBAC2"],
 //     chart: {
 //       fontFamily: "Outfit, sans-serif",
 //       type: "bar",
@@ -150,7 +150,7 @@ export default function MonthlySalesChart() {
   const [isOpen, setIsOpen] = useState(false);
 
   const options: ApexOptions = {
-    colors: ["#4F46E5"],
+    colors: ["#3FBAC2"],
     chart: {
       fontFamily: "Outfit, sans-serif",
       type: "bar",
@@ -216,7 +216,7 @@ export default function MonthlySalesChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-[260px] w-full">
+      <div className="h-[300px] w-full">
         <Chart
           options={options}
           series={series}

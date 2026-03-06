@@ -1,23 +1,47 @@
 import { useEffect, useState } from "react";
 import AllListUserComp from "../../components/Users/AllListUserComp";
+import PendingListUserComp from "../../components/Users/PendingListUserComp";
 import { User, Meta } from "../../types/user";
-import { getAllUsers, deleteUser, blockUser } from "../../api/userApi";
+import {
+    getAllUsers,
+    deleteUser,
+    blockUser,
+    getPendingSellers,
+    getPendingBuyerSellerRequests,
+    approveSeller,
+    approveBuyerSellerRequest
+} from "../../api/userApi";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Pagination from "../../components/common/Pagination";
+import toast from "react-hot-toast";
+
+type MainTab = 'all' | 'pending';
+type PendingTab = 'sellers' | 'buyerToSeller';
 
 const UserListManage = () => {
+    // --- MAIN TABS ---
+    const [mainTab, setMainTab] = useState<MainTab>('all');
+
+    // --- ALL USERS STATE ---
     const [users, setUsers] = useState<User[]>([]);
     const [meta, setMeta] = useState<Meta | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    // Filters
+    // Filters for All Users
     const [search, setSearch] = useState<string>("");
     const [role, setRole] = useState<string>("all");
     const [status, setStatus] = useState<string>("all");
     const [page, setPage] = useState<number>(1);
-    const [isDeleted, setIsDeleted] = useState<boolean>(false);
+    // const [isDeleted, setIsDeleted] = useState<boolean>(false);
 
+    // --- PENDING USERS STATE ---
+    const [pendingTab, setPendingTab] = useState<PendingTab>('sellers');
+    const [pendingUsers, setPendingUsers] = useState<any[]>([]);
+    const [pendingLoading, setPendingLoading] = useState<boolean>(false);
+
+
+    // --- ALL USERS ACTIONS ---
     const fetchUsers = async () => {
         setLoading(true);
         try {
@@ -27,7 +51,7 @@ const UserListManage = () => {
                 search,
                 role: role === 'all' ? undefined : role,
                 status: status === 'all' ? undefined : status,
-                isDeleted
+                // isDeleted
             });
             setUsers(response.data);
             setMeta(response.meta);
@@ -39,11 +63,14 @@ const UserListManage = () => {
     };
 
     useEffect(() => {
-        fetchUsers();
-    }, [page, role, isDeleted, status]);
+        if (mainTab === 'all') {
+            fetchUsers();
+        }
+    }, [page, role, status, mainTab]);
 
     // Debounce search
     useEffect(() => {
+        if (mainTab !== 'all') return;
         const timer = setTimeout(() => {
             if (page !== 1) {
                 setPage(1);
@@ -52,7 +79,7 @@ const UserListManage = () => {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [search, mainTab]);
 
     const handleDelete = async (id: string) => {
         if (confirm("Are you sure you want to delete this user?")) {
@@ -82,111 +109,233 @@ const UserListManage = () => {
         }
     };
 
+
+    // --- PENDING USERS ACTIONS ---
+    const fetchPendingUsers = async () => {
+        setPendingLoading(true);
+        try {
+            let res;
+            if (pendingTab === 'sellers') {
+                res = await getPendingSellers();
+            } else {
+                res = await getPendingBuyerSellerRequests();
+            }
+            setPendingUsers(res.data || []);
+        } catch (error) {
+            console.error("Failed to fetch pending requests", error);
+            toast.error("Failed to fetch pending requests");
+            setPendingUsers([]);
+        } finally {
+            setPendingLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (mainTab === 'pending') {
+            fetchPendingUsers();
+        }
+    }, [pendingTab, mainTab]);
+
+    const handleApprove = async (id: string, isBuyerToSeller: boolean) => {
+        if (!confirm("Approve this request?")) return;
+        try {
+            if (isBuyerToSeller) {
+                await approveBuyerSellerRequest(id, { action: "approve" });
+            } else {
+                await approveSeller(id, { status: "approved" });
+            }
+            toast.success("Request approved successfully");
+            fetchPendingUsers();
+        } catch (error) {
+            toast.error("Failed to approve request");
+        }
+    };
+
+    const handleReject = async (id: string, isBuyerToSeller: boolean) => {
+        if (!confirm("Reject this request?")) return;
+        try {
+            if (isBuyerToSeller) {
+                await approveBuyerSellerRequest(id, { action: 'reject' });
+            } else {
+                await approveSeller(id, { status: 'reject' });
+            }
+            toast.success("Request rejected");
+            fetchPendingUsers();
+        } catch (error) {
+            toast.error("Failed to reject request");
+        }
+    };
+
+
     return (
         <div className="p-6 space-y-6">
             <PageMeta title="User Management" />
             <PageBreadcrumb pageTitle="User Management" />
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                {/* Search Bar */}
-                <div className="flex-1 max-w-2xl relative">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="absolute w-5 h-5 text-gray-400 left-3 top-1/2 -translate-y-1/2"
+            {/* MAIN TABS */}
+            <div className="border-b border-gray-200 dark:border-white/[0.05] mb-6">
+                <nav className="-mb-px flex space-x-8">
+                    <button
+                        onClick={() => setMainTab('all')}
+                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-semibold text-base transition-colors ${mainTab === 'all'
+                            ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                            }`}
                     >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                        />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-white"
-                    />
-                </div>
-
-                {/* Status Dropdown */}
-                <div className="flex items-center gap-3">
-                    <select
-                        value={status}
-                        onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                        className="px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-white"
+                        All Users
+                    </button>
+                    <button
+                        onClick={() => setMainTab('pending')}
+                        className={`whitespace-nowrap pb-4 px-1 border-b-2 font-semibold text-base transition-colors ${mainTab === 'pending'
+                            ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                            }`}
                     >
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-white/[0.05]">
-                <nav className="-mb-px flex space-x-6">
-                    {['all', 'buyer', 'seller'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => { setRole(tab); setPage(1); }}
-                            className={`
-                            whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm
-                            ${role === tab
-                                    ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}
-                        `}
-                        >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)} Users
-                        </button>
-                    ))}
+                        Pending Users
+                    </button>
                 </nav>
             </div>
 
-            {/* Deleted Toggle */}
-            <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={isDeleted}
-                        onChange={(e) => { setIsDeleted(e.target.checked); setPage(1); }}
-                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                    />
-                    Show Deleted Users
-                </label>
-            </div>
+            {mainTab === 'all' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        {/* Search Bar */}
+                        <div className="flex-1 max-w-2xl relative">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="absolute w-5 h-5 text-gray-400 left-3 top-1/2 -translate-y-1/2"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                                />
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-white"
+                            />
+                        </div>
 
-            {/* Content */}
-            {loading && !users.length ? (
-                <div className="h-64 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
-                </div>
-            ) : (
-                <>
-                    <AllListUserComp
-                        users={users}
-                        loading={loading}
-                        onDelete={handleDelete}
-                        onStatusChange={handleStatusChange}
-                    />
+                        {/* Status Dropdown */}
+                        <div className="flex items-center gap-3">
+                            <select
+                                value={status}
+                                onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+                                className="px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-white"
+                            >
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
 
-                    {/* Pagination */}
-                    {meta && (
-                        <Pagination
-                            currentPage={page}
-                            totalPages={meta.totalPages}
-                            totalItems={meta.total}
-                            limit={meta.limit}
-                            onPageChange={handlePageChange}
-                            loading={loading}
-                        />
+                    {/* All Users Profile Tabs */}
+                    <div className="border-b border-gray-200 dark:border-white/[0.05]">
+                        <nav className="-mb-px flex space-x-6">
+                            {['all', 'buyer', 'seller', 'both'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => { setRole(tab); setPage(1); }}
+                                    className={`
+                                    whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors
+                                    ${role === tab
+                                            ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}
+                                `}
+                                >
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)} Users
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+
+                    {/* Deleted Toggle */}
+                    {/* <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={isDeleted}
+                                onChange={(e) => { setIsDeleted(e.target.checked); setPage(1); }}
+                                className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                            />
+                            Show Deleted Users
+                        </label>
+                    </div> */}
+
+                    {/* Content */}
+                    {loading && !users.length ? (
+                        <div className="h-64 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+                        </div>
+                    ) : (
+                        <>
+                            <AllListUserComp
+                                users={users}
+                                loading={loading}
+                                onDelete={handleDelete}
+                                onStatusChange={handleStatusChange}
+                            />
+
+                            {/* Pagination */}
+                            {meta && (
+                                <Pagination
+                                    currentPage={page}
+                                    totalPages={meta.totalPages}
+                                    totalItems={meta.total}
+                                    limit={meta.limit}
+                                    onPageChange={handlePageChange}
+                                    loading={loading}
+                                />
+                            )}
+                        </>
                     )}
-                </>
+                </div>
             )}
+
+            {mainTab === 'pending' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {/* Pending Users Sub-Tabs */}
+                    <div className="border-b border-gray-200 dark:border-white/[0.05]">
+                        <nav className="-mb-px flex space-x-6">
+                            <button
+                                onClick={() => setPendingTab('sellers')}
+                                className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${pendingTab === 'sellers'
+                                    ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                    }`}
+                            >
+                                Pending Sellers
+                            </button>
+                            <button
+                                onClick={() => setPendingTab('buyerToSeller')}
+                                className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${pendingTab === 'buyerToSeller'
+                                    ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                    }`}
+                            >
+                                Buyer to Seller Requests
+                            </button>
+                        </nav>
+                    </div>
+
+                    <PendingListUserComp
+                        users={pendingUsers}
+                        loading={pendingLoading}
+                        onApprove={handleApprove}
+                        onReject={handleReject}
+                    />
+                </div>
+            )}
+
         </div>
     );
 };

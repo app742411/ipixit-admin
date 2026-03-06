@@ -87,7 +87,7 @@ export default function AddCategoryForm({
     setImagePreview(URL.createObjectURL(file));
   };
 
-  /* ❌ REMOVE IMAGE */
+  /*  REMOVE IMAGE */
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview("");
@@ -197,7 +197,7 @@ export default function AddCategoryForm({
               </>
             ) : (
               <>
-                {/* ❌ REMOVE ICON */}
+                {/*  REMOVE ICON */}
                 <button
                   type="button"
                   onClick={handleRemoveImage}

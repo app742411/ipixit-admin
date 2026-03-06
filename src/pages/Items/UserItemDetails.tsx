@@ -1,9 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import { getItemsBySellerId } from "../../api/itemApi";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableRow,
+} from "../../components/ui/table";
 
 export default function SellerItemDetails() {
     const { id } = useParams<{ id: string }>();
@@ -66,7 +74,7 @@ export default function SellerItemDetails() {
             <PageBreadcrumb pageTitle="Seller Items" />
 
             {/* Header with Stats */}
-            <div className="bg-gradient-to-r from-brand-50 to-indigo-50 rounded-xl p-6 border">
+            {/* <div className="bg-gradient-to-r from-brand-50 to-indigo-50 rounded-xl p-6 border">
                 <div className="flex justify-between items-start">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800">Seller Items Management</h1>
@@ -77,7 +85,58 @@ export default function SellerItemDetails() {
                         <p className="text-2xl font-bold text-brand-600">{items.length}</p>
                     </div>
                 </div>
-            </div>
+            </div> */}
+
+            {/* SELLER INFORMATION */}
+            <ComponentCard
+                title="Seller Profile"
+                className="lg:col-span-3 border-0 shadow-lg"
+            >
+                <div className="flex items-start space-x-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-brand-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">
+                                    {selectedItem.seller.firstName} {selectedItem.seller.lastName}
+                                </h3>
+                                <p className="text-gray-500 text-sm mt-1">Seller ID: {selectedItem.seller._id}</p>
+                            </div>
+                            <div className="text-right">
+                                <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-green-100 to-emerald-50 text-green-800 font-medium">
+                                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    Profile Completion: {selectedItem.seller.profileCompletion}%
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-500">Total Items</p>
+                                <p className="text-lg font-bold text-gray-900">{items.length}</p>
+                            </div>
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-500">Active Items</p>
+                                <p className="text-lg font-bold text-green-600">
+                                    {items.filter(i => i.isActive).length}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-500">Seller Since</p>
+                                <p className="text-lg font-bold text-gray-900">
+                                    {new Date().toLocaleDateString()}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ComponentCard>
 
             {/* ITEM LIST */}
             <ComponentCard title="Item Gallery" className="border-0 shadow-lg">
@@ -94,83 +153,88 @@ export default function SellerItemDetails() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {items.map((item) => (
-                        <div
-                            key={item._id}
-                            onClick={() => setSelectedItem(item)}
-                            className={`
-                                group relative border rounded-xl p-4 cursor-pointer transition-all duration-200
-                                hover:shadow-xl hover:border-brand-300 hover:-translate-y-1
-                                ${selectedItem?._id === item._id
-                                    ? "border-brand-500 bg-gradient-to-r from-brand-50 to-white ring-2 ring-brand-200"
-                                    : "border-gray-200 bg-white"}
-                            `}
-                        >
-                            {selectedItem?._id === item._id && (
-                                <div className="absolute -top-2 -right-2">
-                                    <div className="bg-brand-500 text-white text-xs px-2 py-1 rounded-full">
-                                        Selected
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex justify-between items-start mb-3">
-                                <h3 className="font-semibold text-gray-800 group-hover:text-brand-700 line-clamp-1">
-                                    {item.title}
-                                </h3>
-                                <div className={`px-2 py-1 rounded-full text-xs font-medium
-                                    ${item.isActive
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-red-100 text-red-800"}`}>
-                                    {item.isActive ? "Active" : "Inactive"}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-1">
-                                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="font-bold text-gray-900">
-                                        {item.currency} {item.price}
-                                    </span>
-                                </div>
-                                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                                    {item.format}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                                <div className="flex items-center space-x-3">
-                                    <span className="flex items-center">
-                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        {item.viewsCount}
-                                    </span>
-                                    <span className="flex items-center">
-                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                        {item.likesCount}
-                                    </span>
-                                    <span className="flex items-center">
-                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                        </svg>
-                                        {item.purchasesCount}
-                                    </span>
-                                </div>
-                                {item.isDeleted && (
-                                    <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full">
-                                        Deleted
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                    <div className="relative overflow-x-auto" style={{ minHeight: 70 * 5 }}>
+                        <Table className="w-full text-left border-collapse whitespace-nowrap">
+                            <TableHeader>
+                                <TableRow className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
+                                    <TableCell isHeader className="px-4 py-3">Image</TableCell>
+                                    <TableCell isHeader className="px-4 py-3">Title</TableCell>
+                                    <TableCell isHeader className="px-4 py-3">Format</TableCell>
+                                    <TableCell isHeader className="px-4 py-3">Price</TableCell>
+                                    <TableCell isHeader className="px-4 py-3">Stats</TableCell>
+                                    <TableCell isHeader className="px-4 py-3">Active</TableCell>
+                                    <TableCell isHeader className="px-4 py-3">Action</TableCell>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {items.map((item) => (
+                                    <TableRow
+                                        key={item._id}
+                                        onClick={() => setSelectedItem(item)}
+                                        className={`hover:bg-gray-50 border-b border-gray-100 last:border-0 cursor-pointer ${selectedItem?._id === item._id ? "bg-brand-50/50" : ""
+                                            }`}
+                                    >
+                                        <TableCell className="px-4 py-3">
+                                            <img
+                                                src={
+                                                    item.media && item.media.length > 0
+                                                        ? `${import.meta.env.VITE_API_BASE_URL}/uploads/items/images/${item.media[0].filename}`
+                                                        : "/images/placeholder.png"
+                                                }
+                                                alt={item.title}
+                                                className="h-10 w-10 rounded border object-cover"
+                                                onError={(e) => {
+                                                    (e.currentTarget as HTMLImageElement).src =
+                                                        "/images/placeholder.png";
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-gray-900 truncate block max-w-[150px]" title={item.title}>
+                                                    {item.title}
+                                                </span>
+                                                {selectedItem?._id === item._id && (
+                                                    <span className="text-xs text-brand-600 font-medium">Selected</span>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-sm text-gray-600 capitalize">
+                                            {item.format}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-sm font-medium text-gray-900">
+                                            {item.currency} {item.price}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-sm text-gray-600">
+                                            <div className="flex gap-3 text-xs">
+                                                <span title="Views" className="flex items-center gap-1">👁 {item.viewsCount}</span>
+                                                <span title="Likes" className="flex items-center gap-1">❤️ {item.likesCount}</span>
+                                                <span title="Purchases" className="flex items-center gap-1">🛒 {item.purchasesCount}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-sm">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                                }`}>
+                                                {item.isActive ? "Active" : "Inactive"}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3">
+                                            <button
+                                                className="text-brand-600 hover:text-brand-800 text-sm font-medium"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedItem(item);
+                                                }}
+                                            >
+                                                View
+                                            </button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             </ComponentCard>
 
@@ -344,14 +408,27 @@ export default function SellerItemDetails() {
                                             Categories
                                         </label>
                                         <div className="flex flex-wrap gap-2">
-                                            {selectedItem.category.map((c: any) => (
+                                            {selectedItem.category ? (
                                                 <span
-                                                    key={c._id}
                                                     className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-brand-100 to-brand-50 text-brand-800 border border-brand-200"
                                                 >
-                                                    {c.title}
+                                                    {selectedItem.category.title}
                                                 </span>
-                                            ))}
+                                            ) : (
+                                                <span className="text-gray-400">No category</span>
+                                            )}
+                                            {selectedItem.subCategories?.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {selectedItem.subCategories.map((s: any) => (
+                                                        <span
+                                                            key={s._id}
+                                                            className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700"
+                                                        >
+                                                            {s.title}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -414,56 +491,7 @@ export default function SellerItemDetails() {
                             </div>
                         </ComponentCard>
 
-                        {/* SELLER INFORMATION */}
-                        <ComponentCard
-                            title="Seller Profile"
-                            className="lg:col-span-3 border-0 shadow-lg"
-                        >
-                            <div className="flex items-start space-x-4">
-                                <div className="w-16 h-16 bg-gradient-to-br from-brand-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                                    <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-gray-900">
-                                                {selectedItem.seller.firstName} {selectedItem.seller.lastName}
-                                            </h3>
-                                            <p className="text-gray-500 text-sm mt-1">Seller ID: {selectedItem.seller._id}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-green-100 to-emerald-50 text-green-800 font-medium">
-                                                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                                </svg>
-                                                Profile Completion: {selectedItem.seller.profileCompletion}%
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-3 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500">Total Items</p>
-                                            <p className="text-lg font-bold text-gray-900">{items.length}</p>
-                                        </div>
-                                        <div className="p-3 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500">Active Items</p>
-                                            <p className="text-lg font-bold text-green-600">
-                                                {items.filter(i => i.isActive).length}
-                                            </p>
-                                        </div>
-                                        <div className="p-3 bg-gray-50 rounded-lg">
-                                            <p className="text-sm text-gray-500">Seller Since</p>
-                                            <p className="text-lg font-bold text-gray-900">
-                                                {new Date().toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </ComponentCard>
                     </div>
                 </div>
             )}

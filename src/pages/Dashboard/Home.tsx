@@ -1,48 +1,56 @@
 
-import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
-import RecentOrders from "../../components/ecommerce/RecentOrders";
-import DemographicCard from "../../components/ecommerce/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
-import PhotoMetrics from "../../components/ecommerce/PhotoMetrics";
+
+// New Dashboard Components
+import TodaysSales from "../../components/ecommerce/TodaysSales";
+import VisitorInsights from "../../components/ecommerce/VisitorInsights";
+import TotalRevenue from "../../components/ecommerce/TotalRevenue";
+import CustomerSatisfaction from "../../components/ecommerce/CustomerSatisfaction";
+import TargetVsReality from "../../components/ecommerce/TargetVsReality";
+import TopProducts from "../../components/ecommerce/TopProducts";
+import SalesMappingByCountry from "../../components/ecommerce/SalesMappingByCountry";
+import VolumeVsServiceLevel from "../../components/ecommerce/VolumeVsServiceLevel";
 
 export default function Home() {
   return (
     <>
       <PageMeta
-        title="IPixit Dashboard | Sell and Buy Your Photos"
+        title="Dashboard | IPixit"
       />
-      <div className="grid gap-4 md:gap-6">
-        <div className="col-span-12 space-y-4 md:space-y-6">
-          <PhotoMetrics />
-        </div>
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
 
-
-
-        <div className="col-span-12 md:col-span-6 lg:col-span-4">
-          <MonthlyTarget />
-        </div>
-
-        <div className="col-span-12 md:col-span-6 lg:col-span-4">
-
-          <MonthlySalesChart />
-        </div>
-
-
-
-        <div className="col-span-12">
-          <StatisticsChart />
-        </div>
-
-        <div className="col-span-12 xl:col-span-5">
-          <DemographicCard />
-        </div>
-
+        {/* ROW 1 */}
         <div className="col-span-12 xl:col-span-7">
-          <RecentOrders />
+          <TodaysSales />
         </div>
+        <div className="col-span-12 xl:col-span-5">
+          <VisitorInsights />
+        </div>
+
+        {/* ROW 2 */}
+        <div className="col-span-12 lg:col-span-5">
+          <TotalRevenue />
+        </div>
+        <div className="col-span-12 md:col-span-6 lg:col-span-4">
+          <CustomerSatisfaction />
+        </div>
+        <div className="col-span-12 md:col-span-6 lg:col-span-3">
+          <TargetVsReality />
+        </div>
+
+        {/* ROW 3 */}
+        <div className="col-span-12 lg:col-span-5">
+          <TopProducts />
+        </div>
+        <div className="col-span-12 md:col-span-6 lg:col-span-4">
+          <SalesMappingByCountry />
+        </div>
+        <div className="col-span-12 md:col-span-6 lg:col-span-3">
+          <VolumeVsServiceLevel />
+        </div>
+
       </div>
     </>
   );
 }
+

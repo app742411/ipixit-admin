@@ -49,24 +49,27 @@ import { Toaster } from "react-hot-toast";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { AdminProfileProvider } from "./context/AdminProfileContext";
+import { SocketProvider } from "./context/SocketContext";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <ThemeProvider>
       <AdminProfileProvider> {/*  PROFILE API CALLED ONCE */}
         <Suspense fallback={<div>Loading...</div>}>
-          <AppWrapper>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  fontSize: "14px",
-                },
-              }}
-            />
-            <App />
-          </AppWrapper>
+          <SocketProvider>
+            <AppWrapper>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    fontSize: "14px",
+                  },
+                }}
+              />
+              <App />
+            </AppWrapper>
+          </SocketProvider>
         </Suspense>
       </AdminProfileProvider>
     </ThemeProvider>
